@@ -117,7 +117,7 @@ function Apropos() {
                   </p>
                 </div>
                 <div className="col-12 col-lg-5">
-                  <img src={'/src/assets/histoir1.jpg'} alt="Notre Histoire" className="img-fluid" style={{ borderRadius: 12, objectFit: 'cover', width: '100%', height: '100%', maxHeight: 360, boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }} />
+                  <img src={'/histoir1.jpg'} alt="Notre Histoire" className="img-fluid" style={{ borderRadius: 12, objectFit: 'cover', width: '100%', height: '100%', maxHeight: 360, boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }} />
                 </div>
               </div>
             </div>
@@ -180,10 +180,10 @@ function Apropos() {
         </div>
         <div className="row g-4 g-md-5 justify-content-center">
           {[
-            { name: 'Habib Diallo', role: 'PDG et fondateur', img: '/src/assets/fondateurP.jpg' },
-            { name: 'Khadim Mbaye', role: 'Directeur de la Technologie', img: '/src/assets/technologie.jpg' },
-            { name: "Fatou N'Diaye", role: 'Responsable des Opérations', img: '/src/assets/pdg.jpg' },
-            { name: 'Ousmane Gueye', role: 'Coordinateur Logistique Principal', img: '/src/assets/fondation.jpg' },
+            { name: 'Habib Diallo', role: 'PDG et fondateur', img: '/fondateurP.jpg' },
+            { name: 'Khadim Mbaye', role: 'Directeur de la Technologie', img: '/technologie.jpg' },
+            { name: "Fatou N'Diaye", role: 'Responsable des Opérations', img: '/pdg.jpg' },
+            { name: 'Ousmane Gueye', role: 'Coordinateur Logistique Principal', img: '/fondation.jpg' },
           ].map((m, i) => (
             <div
               className="col-6 col-md-3 text-center"

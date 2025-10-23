@@ -95,9 +95,9 @@ import { COLORS } from '../styles/indexStyle.jsx';
     );
   };
   const slides = [
-    '/src/assets/slite1t.jpg',
-    '/src/assets/slide2.jpg',
-    '/src/assets/slider3.jpg',
+    '/slite1t.jpg',
+    '/slide2.jpg',
+    '/slider3.jpg',
   ];
 
   const [scrollAngle, setScrollAngle] = useState(0);
@@ -259,7 +259,7 @@ import { COLORS } from '../styles/indexStyle.jsx';
                   { title: 'Recevez des devis', text: 'Comparez des propositions de transitaires qualifiés.' },
                   { title: 'Choisissez votre transitaire', text: "Sélectionnez l'offre qui vous convient et lancez l'expédition." },
                 ]}
-                imgSrc={'/src/assets/client1.jpg'}
+                imgSrc={'/client1.jpg'}
                 imgAlt={'Clients - Expéditions'}
               />
             </div>
@@ -275,7 +275,7 @@ import { COLORS } from '../styles/indexStyle.jsx';
                   { title: 'Envoyez vos devis', text: 'Répondez aux demandes avec des offres compétitives.' },
                   { title: 'Gagnez de nouveaux clients', text: 'Développez votre activité sur de nouveaux marchés.' },
                 ]}
-                imgSrc={'/src/assets/transitaire1.jpg'}
+                imgSrc={'/transitaire1.jpg'}
                 imgAlt={'Transitaires - Opportunités'}
               />
             </div>
@@ -291,7 +291,7 @@ import { COLORS } from '../styles/indexStyle.jsx';
               <div className="p-4 border rounded-4 h-100" style={{ background: 'var(--bs-body-bg)', boxShadow: '0 16px 36px rgba(0,0,0,0.15)', borderColor: 'var(--bs-border-color-translucent)' }}>
                 <p className="mb-4">"TransDigiSN a transformé notre gestion logistique. Trouver un transitaire fiable n'a jamais été aussi simple et rapide. Une plateforme indispensable !"</p>
                 <div className="d-flex align-items-center gap-3">
-                  <img src={'/src/assets/client2.jpg'} alt="Client" className="rounded-circle" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center top', boxShadow: '0 6px 16px rgba(0,0,0,0.18)' }} />
+                  <img src={'/client2.jpg'} alt="Client" className="rounded-circle" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center top', boxShadow: '0 6px 16px rgba(0,0,0,0.18)' }} />
                   <div>
                     <div className="fw-bold">Marie Dubois</div>
                     <div className="text-muted small">Responsable Logistique, TechCorp</div>
@@ -304,7 +304,7 @@ import { COLORS } from '../styles/indexStyle.jsx';
               <div className="p-4 border rounded-4 h-100 bg-white" style={{ boxShadow: '0 16px 36px rgba(0,0,0,0.15)', borderColor: 'rgba(0,0,0,0.08)' }}>
                 <p className="mb-4">"En tant que transitaire, la plateforme m'a permis d'accéder à un flux constant de nouvelles opportunités. Mon chiffre d'affaires a augmenté de 20% en 6 mois."</p>
                 <div className="d-flex align-items-center gap-3">
-                  <img src={'/src/assets/transitaire2.jpg'} alt="Transitaire" className="rounded-circle" style={{ width: 48, height: 48, objectFit: 'cover', boxShadow: '0 6px 16px rgba(0,0,0,0.18)' }} />
+                  <img src={'/transitaire2.jpg'} alt="Transitaire" className="rounded-circle" style={{ width: 48, height: 48, objectFit: 'cover', boxShadow: '0 6px 16px rgba(0,0,0,0.18)' }} />
                   <div>
                     <div className="fw-bold">Jean Martin</div>
                     <div className="text-muted small">Directeur, LogiPro Transit</div>
@@ -433,13 +433,13 @@ function IndexPage() {
           </div>
           <div className="carousel-inner h-100">
             <div className="carousel-item active h-100">
-              <img src={'/src/assets/slite1t.jpg'} alt="Slide 1" className="d-block w-100 h-100" style={{ objectFit: 'cover' }} />
+              <img src={'/slite1t.jpg'} alt="Slide 1" className="d-block w-100 h-100" style={{ objectFit: 'cover' }} />
             </div>
             <div className="carousel-item h-100">
-              <img src={'/src/assets/slide2.jpg'} alt="Slide 2" className="d-block w-100 h-100" style={{ objectFit: 'cover' }} />
+              <img src={'/slide2.jpg'} alt="Slide 2" className="d-block w-100 h-100" style={{ objectFit: 'cover' }} />
             </div>
             <div className="carousel-item h-100">
-              <img src={'/src/assets/slider3.jpg'} alt="Slide 3" className="d-block w-100 h-100" style={{ objectFit: 'cover' }} />
+              <img src={'/slider3.jpg'} alt="Slide 3" className="d-block w-100 h-100" style={{ objectFit: 'cover' }} />
             </div>
           </div>
           <button className="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
@@ -524,7 +524,7 @@ function IndexPage() {
                   { title: 'Recevez des devis', text: 'Comparez les propositions' },
                   { title: 'Choisissez votre transitaire', text: "Lancez l'expédition" }
                 ]}
-                imgSrc={'/src/assets/client1.jpg'}
+                imgSrc={'/client1.jpg'}
               />
             </div>
             <div className="col-12 col-lg-6">
@@ -539,7 +539,7 @@ function IndexPage() {
                   { title: 'Envoyez vos devis', text: 'Répondez avec des offres compétitives' },
                   { title: 'Gagnez de nouveaux clients', text: 'Développez sur de nouveaux marchés' }
                 ]}
-                imgSrc={'/src/assets/transitaire1.jpg'}
+                imgSrc={'/transitaire1.jpg'}
               />
             </div>
           </div>

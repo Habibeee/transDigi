@@ -177,7 +177,7 @@ function Contact() {
                   <a href="#" className="btn btn-light rounded-circle" style={contactStyles.socialBtn}>f</a>
                 </div>
                 <div className="ms-auto flex-grow-1 d-flex justify-content-end">
-                  <img src={'/src/assets/logo2.jpg'} alt="TransDigiSN" className="img-fluid" style={{ maxHeight: 56, width: 'auto' }} />
+                  <img src={'/logo2.jpg'} alt="TransDigiSN" className="img-fluid" style={{ maxHeight: 56, width: 'auto' }} />
                 </div>
               </div>
             </div>

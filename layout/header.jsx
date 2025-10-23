@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import logo from '../src/assets/logo1.png';
 import { headerStyles } from '../styles/headerStyle.jsx';
 
 function Header() {
@@ -30,7 +29,7 @@ function Header() {
     <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm fixed-top w-100 navbar-compact">
       <div className="container-fluid px-1 py-0">
         <a className="navbar-brand d-flex flex-column align-items-start gap-0" href="#/">
-          <img src={logo} alt="TransDigiSN" style={headerStyles.logo} />
+          <img src={'/logo1.png'} alt="TransDigiSN" style={headerStyles.logo} />
               {/* <strong style={{ color: '#28A745', lineHeight: 1 }}>TransdigiSN</strong> */}
 
         </a>

@@ -1,5 +1,4 @@
  import React from 'react';
-import logo from '../src/assets/logo1.png';
 
 function Footer() {
   return (
@@ -8,7 +7,7 @@ function Footer() {
         <div className="row g-0 align-items-stretch mx-0">
           <div className="col-12 col-lg-4 d-flex flex-column h-100 justify-content-end ps-lg-0">
             <div className="d-flex align-items-center gap-2 mb-2">
-              <img src={logo} alt="Transdigi Sénégal" style={{ height: 36, width: 'auto' }} />
+              <img src={'/logo1.png'} alt="Transdigi Sénégal" style={{ height: 36, width: 'auto' }} />
               <strong style={{ color: '#28A745' }}>TransdigiSN</strong>
             </div>
             <p className="mb-0 text-muted">La plateforme de référence pour la mise en relation avec des transitaires au Sénégal</p>
