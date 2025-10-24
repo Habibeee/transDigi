@@ -3,8 +3,14 @@ import {
   Upload,
   X,
   FileText,
-  Calendar
+  Calendar,
+  LayoutGrid,
+  Search,
+  Clock,
+  Truck,
+  User
 } from 'lucide-react';
+import SideBare from './sideBare.jsx';
 import { nouveauDevisCss } from '../styles/nouveauDeviStyle.jsx';
 
 const NouveauDevis = () => {
@@ -61,7 +67,32 @@ const NouveauDevis = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#F8F9FA', minHeight: '100vh' }}>
+    <div className="bg-body" style={{ backgroundColor: 'var(--bg)', minHeight: '100vh' }}>
+      <SideBare
+        topOffset={96}
+        activeId="devis"
+        defaultOpen={true}
+        closeOnNavigate={false}
+        items={[
+          { id: 'dashboard', label: 'Tableau de bord', icon: LayoutGrid },
+          { id: 'recherche', label: 'Trouver un transitaire', icon: Search },
+          { id: 'devis', label: 'Nouveau devis', icon: FileText },
+          { id: 'historique', label: 'Historique', icon: Clock },
+          { id: 'envois', label: 'Suivi des envois', icon: Truck },
+          { id: 'profile', label: 'Mon profil', icon: User },
+        ]}
+        onNavigate={(id) => {
+          switch(id){
+            case 'dashboard': window.location.hash = '#/dashboard-client'; break;
+            case 'recherche': window.location.hash = '#/recherche-transitaire'; break;
+            case 'devis': window.location.hash = '#/nouveau-devis'; break;
+            case 'historique': window.location.hash = '#/historique'; break;
+            case 'envois': window.location.hash = '#/envois'; break;
+            case 'profile': window.location.hash = '#/profil-client'; break;
+            default: break;
+          }
+        }}
+      />
       <div className="container py-5">
         <div className="row justify-content-center">
           <div className="col-12 col-lg-10 col-xl-8">
@@ -92,7 +123,7 @@ const NouveauDevis = () => {
               <div className="card-body p-4 p-md-5">
                 {/* Détails de l'expédition */}
                 <div className="mb-5">
-                  <h5 className="fw-bold mb-4">Détails de l'expédition</h5>
+                  <h5 className="fw-bold mb-4 section-title">Détails de l'expédition</h5>
                   
                   {/* Type de transport */}
                 
@@ -102,7 +133,7 @@ const NouveauDevis = () => {
                     <label className="form-label fw-semibold">Description de la marchandise</label>
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control form-control-lg"
                       placeholder="ex. Électronique, Meubles"
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
@@ -110,24 +141,21 @@ const NouveauDevis = () => {
                   </div>
 
                   {/* Dimensions Row */}
-                  <div className="row g-3 mb-4">
+                  <div className="row g-3 mb-4 dimension-row">
                     <div className="col-6 col-md-3">
-                      <label className="form-label fw-semibold small">Poids total</label>
-                      <div className="input-group">
-                        <input
-                          type="number"
-                          className="form-control"
-                          placeholder="1000"
-                          value={formData.weight}
-                          onChange={(e) => handleInputChange('weight', e.target.value)}
-                        />
-                        <span className="input-group-text">kg</span>
-                      </div>
+                      <label className="form-label fw-semibold small">Poids total (kg)</label>
+                      <input
+                        type="number"
+                        className="form-control form-control-lg dim-input"
+                        placeholder="1000"
+                        value={formData.weight}
+                        onChange={(e) => handleInputChange('weight', e.target.value)}
+                      />
                     </div>
                     <div className="col-6 col-md-3">
                       <label className="form-label fw-semibold small">Type d'emballage</label>
                       <select 
-                        className="form-select"
+                        className="form-select form-select-lg dim-input"
                         value={formData.packageType}
                         onChange={(e) => handleInputChange('packageType', e.target.value)}
                       >
@@ -137,31 +165,31 @@ const NouveauDevis = () => {
                         <option value="containers">Containers</option>
                       </select>
                     </div>
-                    <div className="col-4 col-md-2">
+                    <div className="col-6 col-md-3">
                       <label className="form-label fw-semibold small">Longueur (cm)</label>
                       <input
                         type="number"
-                        className="form-control"
+                        className="form-control form-control-lg dim-input"
                         placeholder="120"
                         value={formData.length}
                         onChange={(e) => handleInputChange('length', e.target.value)}
                       />
                     </div>
-                    <div className="col-4 col-md-2">
+                    <div className="col-6 col-md-3">
                       <label className="form-label fw-semibold small">Largeur (cm)</label>
                       <input
                         type="number"
-                        className="form-control"
+                        className="form-control form-control-lg dim-input"
                         placeholder="100"
                         value={formData.width}
                         onChange={(e) => handleInputChange('width', e.target.value)}
                       />
                     </div>
-                    <div className="col-4 col-md-2">
+                    <div className="col-6 col-md-3">
                       <label className="form-label fw-semibold small">Hauteur (cm)</label>
                       <input
                         type="number"
-                        className="form-control"
+                        className="form-control form-control-lg dim-input"
                         placeholder="150"
                         value={formData.height}
                         onChange={(e) => handleInputChange('height', e.target.value)}
@@ -172,14 +200,14 @@ const NouveauDevis = () => {
 
                 {/* Origine & Destination */}
                 <div className="mb-5">
-                  <h5 className="fw-bold mb-4">Origine & Destination</h5>
+                  <h5 className="fw-bold mb-4 section-title">Origine & Destination</h5>
                   
                   <div className="row g-4">
                     <div className="col-12 col-md-6">
                       <label className="form-label fw-semibold">Adresse d'enlèvement</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-control form-control-lg"
                         placeholder="Entrez le lieu d'enlèvement"
                         value={formData.pickupAddress}
                         onChange={(e) => handleInputChange('pickupAddress', e.target.value)}
@@ -190,7 +218,7 @@ const NouveauDevis = () => {
                       <div className="position-relative">
                         <input
                           type="date"
-                          className="form-control"
+                          className="form-control form-control-lg"
                           value={formData.pickupDate}
                           onChange={(e) => handleInputChange('pickupDate', e.target.value)}
                         />
@@ -200,7 +228,7 @@ const NouveauDevis = () => {
                       <label className="form-label fw-semibold">Adresse de livraison</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-control form-control-lg"
                         placeholder="Entrez le lieu de livraison"
                         value={formData.deliveryAddress}
                         onChange={(e) => handleInputChange('deliveryAddress', e.target.value)}
@@ -210,7 +238,7 @@ const NouveauDevis = () => {
                       <label className="form-label fw-semibold">Date de livraison souhaitée</label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="form-control form-control-lg"
                         value={formData.deliveryDate}
                         onChange={(e) => handleInputChange('deliveryDate', e.target.value)}
                       />
@@ -220,7 +248,7 @@ const NouveauDevis = () => {
 
                 {/* Upload File Section */}
                 <div className="mb-5">
-                  <h5 className="fw-bold mb-4">Document joint</h5>
+                  <h5 className="fw-bold mb-4 section-title">Document joint</h5>
                   <p className="text-muted small mb-3">
                     Joignez un document avec les détails de votre expédition (facture, liste de colisage, etc.)
                   </p>
@@ -274,7 +302,7 @@ const NouveauDevis = () => {
 
                 {/* Exigences supplémentaires */}
                 <div className="mb-5">
-                  <h5 className="fw-bold mb-4">Exigences supplémentaires</h5>
+                  <h5 className="fw-bold mb-4 section-title">Exigences supplémentaires</h5>
                   
                   <div className="mb-4">
                     <label className="form-label fw-semibold">Manutention spéciale</label>
@@ -326,7 +354,7 @@ const NouveauDevis = () => {
                       </span>
                     </label>
                     <textarea
-                      className="form-control"
+                      className="form-control form-control-lg"
                       rows="4"
                       placeholder="ex. Maçon requise à la livraison, contacter le destinataire avant l'arrivée..."
                       value={formData.notes}

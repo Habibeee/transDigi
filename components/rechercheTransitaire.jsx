@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   MapPin, Wrench, Building2, Search, Bell, User, Star,
-  Plane, Truck, Ship, Package, ArrowUpDown, CheckCircle
+  Plane, Truck, Ship, Package, ArrowUpDown, CheckCircle,
+  LayoutGrid, FileText, Clock
 } from 'lucide-react';
 import { transitaireStyles, transitaireCss } from '../styles/rechercheTransitaireStyle.jsx';
+import SideBare from './sideBare.jsx';
 
 const RechercheTransitaire = () => {
   const [searchFilters, setSearchFilters] = useState({ location: '', service: '', company: '' });
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
   const transitaires = [
     {
@@ -50,10 +54,50 @@ const RechercheTransitaire = () => {
     </div>
   );
 
+  const filtered = useMemo(() => {
+    const loc = searchFilters.location.trim().toLowerCase();
+    const srv = searchFilters.service.trim().toLowerCase();
+    const cmp = searchFilters.company.trim().toLowerCase();
+    return transitaires.filter(t => {
+      const byLoc = !loc || t.location.toLowerCase().includes(loc);
+      const byCmp = !cmp || t.name.toLowerCase().includes(cmp);
+      const bySrv = !srv || (t.services || []).some(s => (s.label || '').toLowerCase().includes(srv));
+      return byLoc && byCmp && bySrv;
+    });
+  }, [searchFilters, transitaires]);
+
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+
   return (
-    <div style={transitaireStyles.app}>
+    <div className="bg-body" style={{ ...transitaireStyles.app, backgroundColor: 'var(--bg)' }}>
       <style>{transitaireCss}</style>
-   
+      <SideBare
+        topOffset={96}
+        activeId="recherche"
+        defaultOpen={true}
+        closeOnNavigate={false}
+        items={[
+          { id: 'dashboard', label: 'Tableau de bord', icon: LayoutGrid },
+          { id: 'recherche', label: 'Trouver un transitaire', icon: Search },
+          { id: 'devis', label: 'Nouveau devis', icon: FileText },
+          { id: 'historique', label: 'Historique', icon: Clock },
+          { id: 'envois', label: 'Suivi des envois', icon: Truck },
+          { id: 'profile', label: 'Mon profil', icon: User },
+        ]}
+        onNavigate={(id) => {
+          switch(id){
+            case 'dashboard': window.location.hash = '#/dashboard-client'; break;
+            case 'recherche': window.location.hash = '#/recherche-transitaire'; break;
+            case 'devis': window.location.hash = '#/nouveau-devis'; break;
+            case 'historique': window.location.hash = '#/historique'; break;
+            case 'envois': window.location.hash = '#/envois'; break;
+            case 'profile': window.location.hash = '#/profil-client'; break;
+            default: break;
+          }
+        }}
+      />
 
       {/* Hero Section */}
       <div className="container py-5">
@@ -85,7 +129,11 @@ const RechercheTransitaire = () => {
                 </div>
               </div>
               <div className="col-12 col-md-3">
-                <button className="btn w-100 text-white" style={transitaireStyles.publishBtn}>
+                <button
+                  className="btn w-100 text-white"
+                  style={transitaireStyles.publishBtn}
+                  onClick={() => setPage(1)}
+                >
                   <Search size={20} className="me-2" /> Rechercher
                 </button>
               </div>
@@ -95,7 +143,9 @@ const RechercheTransitaire = () => {
 
         {/* Results Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <p className="text-muted mb-0">Affichage de 1-9 sur 128 résultats</p>
+          <p className="text-muted mb-0">
+            {total === 0 ? 'Aucun résultat' : `Affichage de ${Math.min((page-1)*pageSize+1, total)}-${Math.min(page*pageSize, total)} sur ${total} résultats`}
+          </p>
           <button className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
             <ArrowUpDown size={16} /> Trier par Pertinence
           </button>
@@ -103,7 +153,7 @@ const RechercheTransitaire = () => {
 
         {/* Transitaire Cards */}
         <div className="row g-4 mb-5">
-          {transitaires.map((transitaire, index) => (
+          {pageItems.map((transitaire, index) => (
             <div key={index} className="col-12 col-lg-4">
               <div className="card border-0 shadow-sm h-100" style={transitaireStyles.cardHover}>
                 <div className="card-body p-4">
@@ -145,7 +195,13 @@ const RechercheTransitaire = () => {
                   </div>
 
                   {/* Action Button */}
-                  <button className="btn w-100 text-white" style={transitaireStyles.primaryBtn}>Demander un devis</button>
+                  <button
+                    className="btn w-100 text-white"
+                    style={transitaireStyles.primaryBtn}
+                    onClick={() => { window.location.hash = '#/nouveau-devis'; }}
+                  >
+                    Demander un devis
+                  </button>
                 </div>
               </div>
             </div>
@@ -155,11 +211,23 @@ const RechercheTransitaire = () => {
         {/* Pagination */}
         <nav>
           <ul className="pagination justify-content-center">
-            <li className="page-item"><button className="page-link">Précédent</button></li>
-            <li className="page-item active"><button className="page-link" style={{ backgroundColor: '#0EA5E9', borderColor: '#0EA5E9' }}>1</button></li>
-            <li className="page-item"><button className="page-link">2</button></li>
-            <li className="page-item"><button className="page-link">3</button></li>
-            <li className="page-item"><button className="page-link">Suivant</button></li>
+            <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+              <button className="page-link" onClick={() => setPage(p => Math.max(1, p - 1))}>Précédent</button>
+            </li>
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <li key={i} className={`page-item ${page === i+1 ? 'active' : ''}`}>
+                <button
+                  className="page-link"
+                  style={page === i+1 ? { backgroundColor: '#0EA5E9', borderColor: '#0EA5E9' } : undefined}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </button>
+              </li>
+            ))}
+            <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+              <button className="page-link" onClick={() => setPage(p => Math.min(totalPages, p + 1))}>Suivant</button>
+            </li>
           </ul>
         </nav>
       </div>

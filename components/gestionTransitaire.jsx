@@ -19,6 +19,21 @@ const StatusBadge = ({ status, type = 'transitaire' }) => {
       'Archivé': { bg: COLORS.lightGray, color: COLORS.quaternary }
     }
   };
+
+  const rowAction = (id, type) => {
+    setData(prev => {
+      if (type === 'delete') return prev.filter(r => r.email !== id);
+      return prev.map(r => {
+        if (r.email !== id) return r;
+        if (type === 'block') return { ...r, status: 'Bloqué' };
+        if (type === 'unblock') return { ...r, status: 'Actif' };
+        if (type === 'archive') return { ...r, status: 'Archivé' };
+        if (type === 'unarchive') return { ...r, status: 'Actif' };
+        return r;
+      });
+    });
+    setOpenMenuId(null);
+  };
   const cfg = (configs[type] || {})[status] || { bg: COLORS.lightGray, color: COLORS.quaternary };
   return <span className="badge px-3 py-2 fw-semibold" style={{ backgroundColor: cfg.bg, color: cfg.color, borderRadius: '999px', fontSize: 12 }}>{status}</span>;
 };
@@ -28,13 +43,15 @@ const GestionTransitaires = () => {
   const [status, setStatus] = useState('Tous');
   const [sector, setSector] = useState('Tous');
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState([]);
 
-  const data = [
+  const [data, setData] = useState([
     { name: 'TransGlobal Logistics', email: 'contact@transglobal.com', sector: 'Maritime', status: 'Actif', date: '12/03/2023' },
     { name: 'RapidCargo Inc.', email: 'info@rapidcargo.com', sector: 'Aérien', status: 'Bloqué', date: '15/04/2023' },
     { name: 'RouteMaster', email: 'support@routemaster.net', sector: 'Routier', status: 'Actif', date: '21/05/2023' },
     { name: 'SeaBreeze Shipping', email: 'contact@seabreeze.com', sector: 'Maritime', status: 'Archivé', date: '02/06/2023' }
-  ];
+  ]);
+  const [openMenuId, setOpenMenuId] = useState(null);
 
   const filtered = useMemo(() => {
     return data.filter(r =>
@@ -48,6 +65,39 @@ const GestionTransitaires = () => {
   const pageSize = 4;
   const totalPages = Math.ceil(filtered.length / pageSize) || 1;
   const rows = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  const allVisibleSelected = rows.length > 0 && rows.every(r => selected.includes(r.email));
+  const toggleSelectAll = () => {
+    if (allVisibleSelected) {
+      setSelected(prev => prev.filter(id => !rows.some(r => r.email === id)));
+    } else {
+      setSelected(prev => Array.from(new Set([...prev, ...rows.map(r => r.email)])));
+    }
+  };
+  const toggleOne = (id) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const doAction = (type) => {
+    if (selected.length === 0) return;
+    setData(prev => {
+      let next = [...prev];
+      if (type === 'delete') {
+        next = next.filter(r => !selected.includes(r.email));
+      } else {
+        next = next.map(r => {
+          if (!selected.includes(r.email)) return r;
+          if (type === 'block') return { ...r, status: 'Bloqué' };
+          if (type === 'unblock') return { ...r, status: 'Actif' };
+          if (type === 'archive') return { ...r, status: 'Archivé' };
+          if (type === 'unarchive') return { ...r, status: 'Actif' };
+          return r;
+        });
+      }
+      return next;
+    });
+    setSelected([]);
+  };
 
   return (
     <div className="container-fluid px-3 px-md-4 py-4">
@@ -102,11 +152,11 @@ const GestionTransitaires = () => {
 
           {/* Action Buttons */}
           <div className="d-flex gap-2 flex-wrap mb-3">
-            <button className="btn btn-outline-secondary btn-sm">Bloquer</button>
-            <button className="btn btn-outline-secondary btn-sm">Débloquer</button>
-            <button className="btn btn-outline-secondary btn-sm">Archiver</button>
-            <button className="btn btn-outline-secondary btn-sm">Suprimer</button>
-            <button className="btn btn-outline-secondary btn-sm">Désarchiver</button>
+            <button className="btn btn-outline-warning btn-sm" onClick={() => doAction('block')} disabled={selected.length===0}>Bloquer</button>
+            <button className="btn btn-outline-success btn-sm" onClick={() => doAction('unblock')} disabled={selected.length===0}>Débloquer</button>
+            <button className="btn btn-outline-secondary btn-sm" onClick={() => doAction('archive')} disabled={selected.length===0}>Archiver</button>
+            <button className="btn btn-outline-danger btn-sm" onClick={() => doAction('delete')} disabled={selected.length===0}>Supprimer</button>
+            <button className="btn btn-outline-info btn-sm" onClick={() => doAction('unarchive')} disabled={selected.length===0}>Désarchiver</button>
           </div>
 
           {/* Table */}
@@ -115,7 +165,7 @@ const GestionTransitaires = () => {
               <thead style={{ backgroundColor: COLORS.lightGray }}>
                 <tr>
                   <th style={{ width: 40 }}>
-                    <input type="checkbox" className="form-check-input" />
+                    <input type="checkbox" className="form-check-input" checked={allVisibleSelected} onChange={toggleSelectAll} />
                   </th>
                   <th className="fw-semibold">Entreprise</th>
                   <th className="fw-semibold d-none d-md-table-cell">Email</th>
@@ -128,16 +178,27 @@ const GestionTransitaires = () => {
               <tbody>
                 {rows.map((r, i) => (
                   <tr key={i}>
-                    <td><input type="checkbox" className="form-check-input" /></td>
+                    <td><input type="checkbox" className="form-check-input" checked={selected.includes(r.email)} onChange={() => toggleOne(r.email)} /></td>
                     <td className="fw-semibold">{r.name}</td>
                     <td className="text-muted d-none d-md-table-cell">{r.email}</td>
                     <td className="d-none d-lg-table-cell">{r.sector}</td>
                     <td><StatusBadge status={r.status} type="transitaire" /></td>
                     <td className="text-muted d-none d-xl-table-cell">{r.date}</td>
-                    <td className="text-end">
-                      <button className="btn btn-sm btn-light">
+                    <td className="text-end position-relative">
+                      <button className="btn btn-sm btn-light" onClick={() => setOpenMenuId(openMenuId === r.email ? null : r.email)}>
                         <MoreHorizontal size={16} />
                       </button>
+                      {openMenuId === r.email && (
+                        <div className="card shadow-sm" style={{ position: 'absolute', right: 0, zIndex: 1050, minWidth: '180px' }}>
+                          <div className="list-group list-group-flush">
+                            <button className="list-group-item list-group-item-action text-warning" onClick={() => rowAction(r.email, 'block')}>Bloquer</button>
+                            <button className="list-group-item list-group-item-action text-success" onClick={() => rowAction(r.email, 'unblock')}>Débloquer</button>
+                            <button className="list-group-item list-group-item-action text-secondary" onClick={() => rowAction(r.email, 'archive')}>Archiver</button>
+                            <button className="list-group-item list-group-item-action text-info" onClick={() => rowAction(r.email, 'unarchive')}>Désarchiver</button>
+                            <button className="list-group-item list-group-item-action text-danger" onClick={() => rowAction(r.email, 'delete')}>Supprimer</button>
+                          </div>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

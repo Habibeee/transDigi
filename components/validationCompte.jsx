@@ -3,10 +3,21 @@ import { validationCompteCss } from '../styles/validationCompteStyle.jsx';
 import { Search } from 'lucide-react';
 
 const seed = [
-  { name: 'John Doe', email: 'john.doe@example.com', type: 'Client', date: '2023-10-27', avatar: '🧑' },
-  { name: 'Global Shipping Inc.', email: 'contact@globalshipping.com', type: 'Transitaire', date: '2023-10-26', avatar: '🚢' },
-  { name: 'Alice Smith', email: 'alice.smith@mail.com', type: 'Client', date: '2023-10-25', avatar: '👩' },
+  { name: 'John Doe', email: 'john.doe@example.com', type: 'Client', date: '2023-10-27' },
+  { name: 'Global Shipping Inc.', email: 'contact@globalshipping.com', type: 'Transitaire', date: '2023-10-26' },
+  { name: 'Alice Smith', email: 'alice.smith@mail.com', type: 'Client', date: '2023-10-25' },
 ];
+
+const getInitials = (label = '') => {
+  const parts = label
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
 
 const BadgeType = ({ type }) => (
   <span className={`badge-type ${type === 'Client' ? 'client' : 'transitaire'}`}>{type}</span>
@@ -16,8 +27,8 @@ const Row = ({ item, onValidate, onRefuse }) => (
   <tr>
     <td>
       <div className="d-flex align-items-center gap-3">
-        <div className="rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: 36, height: 36 }}>
-          <span style={{ fontSize: 18 }}>{item.avatar}</span>
+        <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, backgroundColor: '#E3F2FD', color: '#0d6efd', fontWeight: 700, fontSize: 12 }}>
+          {getInitials(item.name)}
         </div>
         <div>
           <div className="fw-semibold">{item.name}</div>
@@ -38,15 +49,28 @@ const ValidationCompte = () => {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('Tous');
   const [sort, setSort] = useState('desc');
+  const [items] = useState(seed);
+  const [actionMsg, setActionMsg] = useState({ text: '', type: '' });
 
   const data = useMemo(() => {
-    let out = seed.filter(s => (filter === 'Tous' || s.type === filter) && (
+    let out = items.filter(s => (filter === 'Tous' || s.type === filter) && (
       s.name.toLowerCase().includes(query.toLowerCase()) ||
       s.email.toLowerCase().includes(query.toLowerCase())
     ));
     out = out.sort((a,b)=> sort==='desc' ? (b.date.localeCompare(a.date)) : (a.date.localeCompare(b.date)));
     return out;
-  }, [query, filter, sort]);
+  }, [items, query, filter, sort]);
+
+  const handleValidate = (email) => {
+    const it = items.find(i => i.email === email);
+    setActionMsg({ text: `${it?.name || 'Compte'} validé avec succès`, type: 'success' });
+    setTimeout(() => setActionMsg({ text: '', type: '' }), 2500);
+  };
+  const handleRefuse = (email) => {
+    const it = items.find(i => i.email === email);
+    setActionMsg({ text: `${it?.name || 'Compte'} refusé`, type: 'danger' });
+    setTimeout(() => setActionMsg({ text: '', type: '' }), 2500);
+  };
 
   return (
     <div className="container-fluid px-3 px-md-4 py-4">
@@ -55,6 +79,12 @@ const ValidationCompte = () => {
 
       <div className="card border-0 shadow-sm">
         <div className="card-body">
+          {actionMsg.text && (
+            <div className={`alert alert-${actionMsg.type} d-flex justify-content-between align-items-center`} role="alert">
+              <span>{actionMsg.text}</span>
+              <button type="button" className="btn-close" aria-label="Close" onClick={() => setActionMsg({ text: '', type: '' })}></button>
+            </div>
+          )}
           <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 toolbar mb-3">
             <div className="input-group" style={{ maxWidth: 420 }}>
               <span className="input-group-text bg-white"><Search size={18} /></span>
@@ -88,8 +118,8 @@ const ValidationCompte = () => {
                   <Row
                     key={idx}
                     item={item}
-                    onValidate={()=>{}}
-                    onRefuse={()=>{}}
+                    onValidate={()=>handleValidate(item.email)}
+                    onRefuse={()=>handleRefuse(item.email)}
                   />
                 ))}
               </tbody>

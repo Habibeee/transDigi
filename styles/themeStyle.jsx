@@ -39,7 +39,7 @@ export const themeCss = `
   }
   body { background-color: var(--bg); color: var(--text); }
   .card { background-color: var(--card); border-color: var(--border); }
-  .table thead th { border-color: var(--border); }
+  .table thead th { border-color: var(--border); color: var(--text); }
   .table tbody td { border-color: var(--border); }
   .link-primary { color: var(--primary) !important; }
   .btn-primary { background-color: var(--primary); border-color: var(--primary); }
@@ -81,4 +81,6 @@ export const themeCss = `
   [data-theme="dark"] .table { color: var(--text); }
   [data-theme="dark"] .table thead { background-color: #0f172a; }
   [data-theme="dark"] .table tbody tr { background-color: #0b1220; }
+  [data-theme="dark"] .table thead th, 
+  [data-theme="dark"] .table tbody td { color: var(--text) !important; }
 `;

@@ -17,7 +17,7 @@ const DetailDevis = () => {
   };
 
   return (
-    <div className="bg-light py-4 py-md-5">
+    <div className="bg-body py-4 py-md-5">
       <style>{detailDevisCss}</style>
       <SideBare
         topOffset={96}
@@ -28,6 +28,18 @@ const DetailDevis = () => {
           { id: 'dashboard', label: 'Tableau de bord', icon: LayoutGrid },
           { id: 'profil', label: 'Mon profil', icon: User },
         ]}
+        onNavigate={(id) => {
+          switch(id){
+            case 'dashboard':
+              window.location.hash = '#/dashboard-transitaire';
+              break;
+            case 'profil':
+              window.location.hash = '#/profile';
+              break;
+            default:
+              break;
+          }
+        }}
       />
       <div className="container">
         <div className="row justify-content-center">
@@ -81,9 +93,8 @@ const DetailDevis = () => {
                     <label className="form-label fw-semibold small">Commentaires / Message au client</label>
                     <textarea className="form-control" rows={4} placeholder="Ajoutez des détails, conditions ou un message pour le client..." value={message} onChange={(e) => setMessage(e.target.value)} />
                   </div>
-                <div className="d-flex gap-2">
-                  <button type="button" className="btn btn-danger">Refuser</button>
-                  <button type="submit" className="btn btn-primary btn-success">Envoyer le devis</button>
+                <div className="d-flex gap-2 justify-content-end">
+                  <button type="submit" className="btn btn-primary">Envoyer le devis</button>
                 </div>
 </form>
               </div>

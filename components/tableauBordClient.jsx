@@ -15,6 +15,7 @@ const ClientDashboard = () => {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [section, setSection] = useState(() => (typeof window !== 'undefined' && window.location.hash === '#/historique') ? 'historique' : 'dashboard');
   const chartId = 'clientActivityChart';
+  const avatarUrl = 'https://i.pravatar.cc/64?img=5';
 
   // Sync section with current hash (so #/historique opens Historique with sidebar)
   useEffect(() => {
@@ -112,7 +113,7 @@ const ClientDashboard = () => {
   const isHistoriqueHash = typeof window !== 'undefined' && window.location.hash === '#/historique';
 
   return (
-    <div className="d-flex" style={clientStyles.layout}>
+    <div className="d-flex bg-body" style={clientStyles.layout}>
       <style>{clientCss}</style>
       {/* Sidebar (SideBare) */}
       <SideBare
@@ -130,10 +131,27 @@ const ClientDashboard = () => {
         ]}
         onNavigate={(id) => {
           setSection(id);
-          if (id === 'historique') {
-            window.location.hash = '#/historique';
-          } else if (id === 'dashboard') {
-            window.location.hash = '#/dashboard-client';
+          switch(id){
+            case 'dashboard':
+              window.location.hash = '#/dashboard-client';
+              break;
+            case 'trouver-transitaire':
+              window.location.hash = '#/recherche-transitaire';
+              break;
+            case 'nouveau-devis':
+              window.location.hash = '#/nouveau-devis';
+              break;
+            case 'historique':
+              window.location.hash = '#/historique';
+              break;
+            case 'profil':
+              window.location.hash = '#/profil-client';
+              break;
+            case 'envois':
+              window.location.hash = '#/envois';
+              break;
+            default:
+              break;
           }
         }}
       />
@@ -141,11 +159,11 @@ const ClientDashboard = () => {
       {/* Main Content */}
       <div className="flex-grow-1 bg-body" style={{ marginLeft: '0' }}>
         <div className="d-flex justify-content-end align-items-center gap-2 position-relative">
-          <button className="btn btn-link" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
-            <User size={20} />
-          </button>
           <button className="btn btn-link">
             <Bell size={20} />
+          </button>
+          <button className="btn p-0 border-0 bg-transparent" onClick={() => setProfileMenuOpen(!profileMenuOpen)} aria-label="Ouvrir menu profil">
+            <img src={avatarUrl} alt="Profil" className="rounded-circle" style={{ width: 36, height: 36, objectFit: 'cover', border: '2px solid #e9ecef' }} />
           </button>
           {profileMenuOpen && (
             <div className="card shadow-sm" style={{ position: 'absolute', top: '100%', right: 0, zIndex: 1050, minWidth: '200px' }}>
@@ -166,11 +184,7 @@ const ClientDashboard = () => {
 
         {/* Main Content Area */}
         <div className="container-fluid bg-body px-4 py-4">
-          {(section === 'trouver-transitaire') ? (
-            <RechercheTransitaire />
-          ) : section === 'nouveau-devis' ? (
-            <NouveauDevis />
-          ) : section === 'envois' ? (
+          {section === 'envois' ? (
             <TrackingApp />
           ) : section === 'profil' ? (
             <ModofierProfClient />

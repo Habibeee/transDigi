@@ -23,6 +23,7 @@ const TransitaireDashboard = () => {
   const [searchFilter, setSearchFilter] = useState('');
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [activeSideItem, setActiveSideItem] = useState(() => (typeof window !== 'undefined' && window.location.hash === '#/profile') ? 'profil' : 'dashboard');
+  const avatarUrl = 'https://i.pravatar.cc/64?img=22';
 
   useEffect(() => {
     const syncFromHash = () => {
@@ -92,7 +93,7 @@ const TransitaireDashboard = () => {
   const isLgUp = typeof window !== 'undefined' ? window.innerWidth >= 992 : false;
 
   return (
-    <div className="d-flex" style={transitareStyles.layout}>
+    <div className="d-flex bg-body" style={transitareStyles.layout}>
       <style>{transitareCss}</style>
       {/* Sidebar (SideBare) */}
       <SideBare
@@ -115,13 +116,13 @@ const TransitaireDashboard = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-grow-1" style={{ marginLeft: '0' }}>
+      <div className="flex-grow-1 bg-body" style={{ marginLeft: '0' }}>
         <div className="d-flex justify-content-end align-items-center gap-2 position-relative">
-          <button className="btn btn-link" onClick={() => setProfileMenuOpen(!profileMenuOpen)}>
-            <User size={20} />
-          </button>
           <button className="btn btn-link">
             <Bell size={20} />
+          </button>
+          <button className="btn p-0 border-0 bg-transparent" onClick={() => setProfileMenuOpen(!profileMenuOpen)} aria-label="Ouvrir menu profil">
+            <img src={avatarUrl} alt="Profil" className="rounded-circle" style={{ width: 36, height: 36, objectFit: 'cover', border: '2px solid #e9ecef' }} />
           </button>
           {profileMenuOpen && (
             <div className="card shadow-sm" style={{ position: 'absolute', top: '100%', right: 0, zIndex: 1050, minWidth: '200px' }}>

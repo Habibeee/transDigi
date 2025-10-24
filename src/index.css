@@ -24,10 +24,7 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -52,6 +49,40 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (min-width: 992px) {
+  body {
+    padding-top: 64px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-section {
+    min-height: 60vh !important;
+  }
+  .hero-inner {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  .hero-cta {
+    gap: 0.5rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero-cta .btn {
+    padding: 0.6rem 1rem;
+  }
+}
+
+.panel-img {
+  max-height: 420px;
+}
+@media (max-width: 576px) {
+  .panel-img {
+    max-height: 50vh;
+  }
 }
 
 @media (prefers-color-scheme: light) {

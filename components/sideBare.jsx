@@ -4,7 +4,7 @@ import { sideBareStyles, sideBareCss } from '../styles/sideBareStyle.jsx';
 
 const menuItems = [
   { id: 'dashboard', label: 'Tableau de bord', icon: LayoutGrid },
-  { id: 'recherche', label: 'Rechercher', icon: Search },
+  { id: 'recherche', label: 'Trouver un transitaire', icon: Search },
   { id: 'devis', label: 'Mes devis', icon: FileText },
   { id: 'envois', label: "Suivi des envois", icon: Truck },
   { id: 'historique', label: 'Historique', icon: Clock },

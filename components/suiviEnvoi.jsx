@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Package, MapPin, Calendar, ChevronDown } from 'lucide-react';
 import { suiviEnvoiCss } from '../styles/suiviEnvoiStyle.jsx';
 
@@ -6,6 +6,33 @@ const TrackingApp = () => {
   const [activeTab, setActiveTab] = useState('en-cours');
   const [selectedShipment, setSelectedShipment] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({ status: 'all', carrier: 'all', dateFrom: '', dateTo: '' });
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const pathRef = useRef([]);
+  const pathIndexRef = useRef(0);
+  const moveTimerRef = useRef(null);
+
+  const currentHistoryIndex = useMemo(() => {
+    if (!selectedShipment?.history || selectedShipment.history.length === 0) return null;
+    const history = selectedShipment.history;
+    const norm = (s) => (s || '').toLowerCase();
+    const labels = history.map(e => norm(e.status));
+
+    if (norm(selectedShipment.status) === 'livre') {
+      const i = labels.indexOf('livré');
+      if (i !== -1) return i;
+    } else {
+      const preference = ['en cours de livraison', 'arrivé au centre de tri', 'colis pris en charge'];
+      for (const p of preference) {
+        const i = labels.indexOf(p);
+        if (i !== -1) return i;
+      }
+    }
+    return 0; // fallback: plus récent
+  }, [selectedShipment]);
 
   const shipments = [
     {
@@ -16,6 +43,8 @@ const TrackingApp = () => {
       progress: 60,
       origin: 'Lyon, FR',
       destination: 'Paris, FR',
+      originCoords: [45.764, 4.8357],
+      destinationCoords: [48.8566, 2.3522],
       history: [
         { status: 'Livré', date: '01/04/2024 - 14:30', description: 'Votre colis a été livré.', location: '' },
         { status: 'En cours de livraison', date: '01/04/2024 - 09:00', description: 'Le colis est avec le livreur.', location: '' },
@@ -36,7 +65,9 @@ const TrackingApp = () => {
       statusLabel: 'Transporté: Fedex',
       progress: 40,
       origin: 'Dakar, SN',
-      destination: 'Paris, FR'
+      destination: 'Paris, FR',
+      originCoords: [14.7167, -17.4677],
+      destinationCoords: [48.8566, 2.3522]
     },
     {
       id: 'CIPR47H2',
@@ -45,18 +76,107 @@ const TrackingApp = () => {
       statusLabel: 'Terminée',
       progress: 100,
       origin: 'Paris, FR',
-      destination: 'Lyon, FR'
+      destination: 'Lyon, FR',
+      originCoords: [48.8566, 2.3522],
+      destinationCoords: [45.764, 4.8357]
     }
   ];
 
-  const filteredShipments = shipments.filter(s => 
-    activeTab === 'en-cours' ? s.status !== 'livre' : s.status === 'livre'
-  ).filter(s => 
-    s.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const interpolatePath = (a, b, steps = 30) => {
+    if (!a || !b) return [];
+    const [lat1, lng1] = a; const [lat2, lng2] = b;
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      pts.push([lat1 + (lat2 - lat1) * t, lng1 + (lng2 - lng1) * t]);
+    }
+    return pts;
+  };
+
+  const filteredShipments = shipments
+    .filter(s => (activeTab === 'en-cours' ? s.status !== 'livre' : s.status === 'livre'))
+    .filter(s => s.id.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(s => {
+      if (filters.status !== 'all') {
+        if (filters.status === 'livre' && s.status !== 'livre') return false;
+        if (filters.status === 'en-transit' && s.status !== 'en-transit') return false;
+      }
+      if (filters.carrier !== 'all') {
+        if (!s.statusLabel.toLowerCase().includes(filters.carrier.toLowerCase())) return false;
+      }
+      if (filters.dateFrom) {
+        const sd = s.date ? new Date(s.date.split('/').reverse().join('-')) : null;
+        const from = new Date(filters.dateFrom);
+        if (sd && sd < from) return false;
+      }
+      if (filters.dateTo) {
+        const sd = s.date ? new Date(s.date.split('/').reverse().join('-')) : null;
+        const to = new Date(filters.dateTo);
+        if (sd && sd > to) return false;
+      }
+      return true;
+    });
+
+  const totalPages = Math.max(1, Math.ceil(filteredShipments.length / pageSize));
+  const currentPageShipments = filteredShipments.slice((page - 1) * pageSize, page * pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, filters, activeTab]);
+
+  useEffect(() => {
+    // Initialize or update map when a shipment is selected
+    const L = window.L;
+    if (!selectedShipment || !L) return;
+
+    const path = interpolatePath(selectedShipment.originCoords, selectedShipment.destinationCoords, 40);
+    pathRef.current = path;
+    // derive starting index from progress
+    const startIdx = Math.floor((selectedShipment.progress / 100) * (path.length - 1));
+    pathIndexRef.current = Math.min(Math.max(startIdx, 0), path.length - 1);
+
+    if (!mapRef.current) {
+      mapRef.current = L.map('leafletMap').setView(path[pathIndexRef.current] || selectedShipment.originCoords || [14.7, -17.4], 5);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+      }).addTo(mapRef.current);
+    } else {
+      mapRef.current.setView(path[pathIndexRef.current] || selectedShipment.originCoords || [14.7, -17.4], 5);
+    }
+
+    if (markerRef.current) {
+      markerRef.current.remove();
+      markerRef.current = null;
+    }
+    markerRef.current = L.marker(path[pathIndexRef.current] || selectedShipment.originCoords).addTo(mapRef.current);
+
+    // clear previous timer
+    if (moveTimerRef.current) {
+      clearInterval(moveTimerRef.current);
+      moveTimerRef.current = null;
+    }
+    // simulate live movement for en-transit only
+    if (selectedShipment.status === 'en-transit') {
+      moveTimerRef.current = setInterval(() => {
+        pathIndexRef.current = Math.min(pathIndexRef.current + 1, pathRef.current.length - 1);
+        if (markerRef.current) markerRef.current.setLatLng(pathRef.current[pathIndexRef.current]);
+        if (pathIndexRef.current >= pathRef.current.length - 1) {
+          clearInterval(moveTimerRef.current);
+          moveTimerRef.current = null;
+        }
+      }, 1500);
+    }
+
+    return () => {
+      if (moveTimerRef.current) {
+        clearInterval(moveTimerRef.current);
+        moveTimerRef.current = null;
+      }
+    };
+  }, [selectedShipment]);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <div className="bg-body" style={{ minHeight: '100vh', backgroundColor: 'var(--bg)' }}>
       <style>{suiviEnvoiCss}</style>
       <div className="container py-4">
         <div className="row">
@@ -66,33 +186,42 @@ const TrackingApp = () => {
 
               {/* Search Bar */}
               <div className="position-relative mb-4">
-                <Search size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#6c757d' }} />
+                <Search size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
                 <input
                   type="text"
                   className="form-control ps-5"
                   placeholder="Rechercher un envoi par numéro de suivi"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ backgroundColor: '#f8f9fa', border: 'none', padding: '12px 12px 12px 45px' }}
+                  style={{ backgroundColor: 'var(--card)', border: 'none', padding: '12px 12px 12px 45px' }}
                 />
               </div>
 
               {/* Filters */}
-              <div className="d-flex gap-3 mb-4 flex-wrap">
-                <div className="dropdown">
-                  <button className="btn btn-light dropdown-toggle" type="button">
-                    Filtrer par date <ChevronDown size={16} />
-                  </button>
+              <div className="row g-3 mb-4">
+                <div className="col-12 col-md-3">
+                  <label className="form-label small text-muted">Statut</label>
+                  <select className="form-select" value={filters.status} onChange={(e)=>setFilters(f=>({...f, status: e.target.value }))}>
+                    <option value="all">Tous</option>
+                    <option value="en-transit">En transit</option>
+                    <option value="livre">Livré</option>
+                  </select>
                 </div>
-                <div className="dropdown">
-                  <button className="btn btn-light dropdown-toggle" type="button">
-                    Filtrer par statut <ChevronDown size={16} />
-                  </button>
+                <div className="col-12 col-md-3">
+                  <label className="form-label small text-muted">Transporteur</label>
+                  <select className="form-select" value={filters.carrier} onChange={(e)=>setFilters(f=>({...f, carrier: e.target.value }))}>
+                    <option value="all">Tous</option>
+                    <option value="chronopost">Chronopost</option>
+                    <option value="fedex">Fedex</option>
+                  </select>
                 </div>
-                <div className="dropdown">
-                  <button className="btn btn-light dropdown-toggle" type="button">
-                    Filtrer par transitaire <ChevronDown size={16} />
-                  </button>
+                <div className="col-6 col-md-3">
+                  <label className="form-label small text-muted">Du</label>
+                  <input type="date" className="form-control" value={filters.dateFrom} onChange={(e)=>setFilters(f=>({...f, dateFrom: e.target.value }))} />
+                </div>
+                <div className="col-6 col-md-3">
+                  <label className="form-label small text-muted">Au</label>
+                  <input type="date" className="form-control" value={filters.dateTo} onChange={(e)=>setFilters(f=>({...f, dateTo: e.target.value }))} />
                 </div>
               </div>
 
@@ -103,8 +232,8 @@ const TrackingApp = () => {
                     className={`nav-link ${activeTab === 'en-cours' ? 'active' : ''}`}
                     onClick={() => setActiveTab('en-cours')}
                     style={{ 
-                      color: activeTab === 'en-cours' ? '#007BFF' : '#6c757d',
-                      borderBottom: activeTab === 'en-cours' ? '3px solid #007BFF' : 'none',
+                      color: activeTab === 'en-cours' ? 'var(--primary)' : 'var(--muted)',
+                      borderBottom: activeTab === 'en-cours' ? '3px solid var(--primary)' : 'none',
                       fontWeight: activeTab === 'en-cours' ? '600' : '400'
                     }}
                   >
@@ -116,8 +245,8 @@ const TrackingApp = () => {
                     className={`nav-link ${activeTab === 'terminee' ? 'active' : ''}`}
                     onClick={() => setActiveTab('terminee')}
                     style={{ 
-                      color: activeTab === 'terminee' ? '#007BFF' : '#6c757d',
-                      borderBottom: activeTab === 'terminee' ? '3px solid #007BFF' : 'none',
+                      color: activeTab === 'terminee' ? 'var(--primary)' : 'var(--muted)',
+                      borderBottom: activeTab === 'terminee' ? '3px solid var(--primary)' : 'none',
                       fontWeight: activeTab === 'terminee' ? '600' : '400'
                     }}
                   >
@@ -128,17 +257,17 @@ const TrackingApp = () => {
 
               {/* Shipments List */}
               <div className="d-flex flex-column gap-3">
-                {filteredShipments.map((shipment) => (
+                {currentPageShipments.map((shipment) => (
                   <div 
                     key={shipment.id}
                     className="border rounded-3 p-3 bg-white shipment-card"
-                    style={{ cursor: 'pointer', backgroundColor: selectedShipment?.id === shipment.id ? '#f0f8ff' : 'white' }}
+                    style={{ cursor: 'pointer', backgroundColor: selectedShipment?.id === shipment.id ? 'rgba(52, 211, 153, 0.12)' : 'var(--card)' }}
                     onClick={() => setSelectedShipment(shipment)}
                   >
                     <div className="d-flex justify-content-between align-items-start mb-3">
                       <div className="d-flex align-items-start gap-3">
                         <div className="bg-light rounded-circle p-2" style={{ width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Package size={20} color="#6c757d" />
+                          <Package size={20} color="var(--muted)" />
                         </div>
                         <div>
                           <h6 className="fw-bold mb-1">Envoi {shipment.id}</h6>
@@ -155,6 +284,15 @@ const TrackingApp = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Pagination */}
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <small className="text-muted">Page {page} sur {totalPages}</small>
+                <div className="btn-group">
+                  <button className="btn btn-outline-secondary btn-sm" disabled={page === 1} onClick={()=>setPage(p=>Math.max(1, p-1))}>Précédent</button>
+                  <button className="btn btn-outline-secondary btn-sm" disabled={page === totalPages} onClick={()=>setPage(p=>Math.min(totalPages, p+1))}>Suivant</button>
+                </div>
               </div>
             </div>
           </div>
@@ -176,17 +314,8 @@ const TrackingApp = () => {
                   </span>
                 </div>
 
-                {/* Map Placeholder */}
-                <div className="mb-4" style={{ 
-                  height: '200px', 
-                  backgroundColor: '#e8d7c3', 
-                  borderRadius: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <MapPin size={40} color="#8b7355" />
-                </div>
+                {/* Map */}
+                <div id="leafletMap" className="mb-4" style={{ height: '240px', borderRadius: '8px', overflow: 'hidden' }} />
 
                 {/* History */}
                 <div className="mb-4">
@@ -195,7 +324,7 @@ const TrackingApp = () => {
                     {selectedShipment.history?.map((event, index) => (
                       <div key={index} className="timeline-item d-flex">
                         <div className="timeline-axis position-relative">
-                          <span className={`timeline-dot ${index === 0 ? 'is-current' : ''}`}></span>
+                          <span className={`timeline-dot ${index === currentHistoryIndex ? 'is-current' : ''}`}></span>
                           {index < selectedShipment.history.length - 1 && (
                             <span className="timeline-line"></span>
                           )}
@@ -240,7 +369,7 @@ const TrackingApp = () => {
               </div>
             ) : (
               <div className="bg-white rounded-3 shadow-sm p-4 text-center text-muted">
-                <Package size={48} color="#dee2e6" className="mb-3" />
+                <Package size={48} color="var(--border)" className="mb-3" />
                 <p>Sélectionnez un envoi pour voir les détails</p>
               </div>
             )}

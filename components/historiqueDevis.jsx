@@ -1,18 +1,17 @@
 import React, { useMemo, useState } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, LayoutGrid, FileText, Clock, User, Truck, Search as SearchIcon } from 'lucide-react';
+import SideBare from './sideBare.jsx';
 import { historiqueDevisCss } from '../styles/historiqueDevisStyle.jsx';
 
 const statusMeta = {
   accepte: { label: 'Accepté', className: 'badge-status success' },
   attente: { label: 'En attente', className: 'badge-status warning' },
-  expire: { label: 'Expiré', className: 'badge-status muted' },
 };
 
 const seedRows = [
   { id: '#DEV001', transitaire: 'Transports Rapides SA', date: '15/03/2023', destination: 'Port de Marseille', statut: 'accepte', total: '2,500€' },
   { id: '#DEV002', transitaire: 'Logistique Globale', date: '12/03/2023', destination: "Port d’Anvers", statut: 'attente', total: '1,800€' },
   { id: '#DEV003', transitaire: 'Mer et Ciel Cargo', date: '10/03/2023', destination: 'Port de Rotterdam', statut: 'attente', total: '3,200€' },
-  { id: '#DEV004', transitaire: 'Express Shipping Co.', date: '05/03/2023', destination: 'Port de Hambourg', statut: 'expire', total: '2,100€' },
   { id: '#DEV005', transitaire: 'Transports Dubois', date: '02/03/2023', destination: 'Port de Valence', statut: 'accepte', total: '2,900€' },
 ];
 
@@ -50,8 +49,33 @@ const HistoriqueDevis = () => {
   };
 
   return (
-    <div className="bg-light" style={{ minHeight: '100vh' }}>
+    <div className="bg-body" style={{ minHeight: '100vh' }}>
       <style>{historiqueDevisCss}</style>
+      <SideBare
+        topOffset={96}
+        activeId="historique"
+        defaultOpen={true}
+        closeOnNavigate={false}
+        items={[
+          { id: 'dashboard', label: 'Tableau de bord', icon: LayoutGrid },
+          { id: 'recherche', label: 'Trouver un transitaire', icon: SearchIcon },
+          { id: 'devis', label: 'Nouveau devis', icon: FileText },
+          { id: 'envois', label: 'Suivi des envois', icon: Truck },
+          { id: 'historique', label: 'Historique', icon: Clock },
+          { id: 'profile', label: 'Mon profil', icon: User },
+        ]}
+        onNavigate={(id) => {
+          switch(id){
+            case 'dashboard': window.location.hash = '#/dashboard-client'; break;
+            case 'recherche': window.location.hash = '#/recherche-transitaire'; break;
+            case 'devis': window.location.hash = '#/nouveau-devis'; break;
+            case 'envois': window.location.hash = '#/envois'; break;
+            case 'historique': window.location.hash = '#/historique'; break;
+            case 'profile': window.location.hash = '#/profil-client'; break;
+            default: break;
+          }
+        }}
+      />
       <div className="container-fluid px-3 px-md-4 py-4">
         <h2 className="fw-bold mb-3">Mon Historique de Devis</h2>
 
@@ -60,7 +84,7 @@ const HistoriqueDevis = () => {
           <div className="card-body p-3 p-md-4">
             <div className="d-flex flex-column flex-xl-row align-items-stretch gap-2">
               <div className="position-relative flex-grow-1">
-                <Search size={18} className="text-muted" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }} />
+                <Search size={18} className="text-muted" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
                 <input className="form-control ps-5" placeholder="Rechercher par transitaire ou numéro" value={query} onChange={(e) => setQuery(e.target.value)} />
               </div>
               <select className="form-select filter-select" value={status} onChange={(e) => setStatus(e.target.value)}>

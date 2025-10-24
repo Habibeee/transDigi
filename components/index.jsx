@@ -77,10 +77,9 @@ import { COLORS } from '../styles/indexStyle.jsx';
                 ref={imgRef}
                 src={imgSrc}
                 alt={imgAlt || title}
-                className="img-fluid"
+                className="img-fluid panel-img"
                 style={{
                   width: '100%',
-                  maxHeight: 420,
                   objectFit: 'cover',
                   borderRadius: 14,
                   boxShadow: '0 18px 40px rgba(0,0,0,0.25)',
@@ -406,10 +405,9 @@ function IndexPage() {
               ref={imgRef}
               src={imgSrc}
               alt={title}
-              className="img-fluid rounded-3"
+              className="img-fluid rounded-3 panel-img"
               style={{
                 width: '100%',
-                maxHeight: '400px',
                 objectFit: 'cover',
                 boxShadow: '0 18px 40px rgba(0,0,0,0.25)',
                 transform: `rotate(${angle}deg)`,
@@ -459,10 +457,23 @@ function IndexPage() {
             </h1>
             <p className="lead mb-4">Connectez-vous avec des transitaires fiables en un clic</p>
             <div className="d-flex gap-3 flex-wrap justify-content-center">
-              <button className="btn btn-lg px-5 py-3 fw-semibold" style={{ backgroundColor: COLORS.green, color: 'white', border: 'none' }}>
+              <button
+                className="btn btn-lg px-5 py-3 fw-semibold"
+                style={{ backgroundColor: COLORS.green, color: 'white', border: 'none' }}
+                onClick={() => {
+                  const el = document.getElementById('how-client');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+              >
                 Je suis un client
               </button>
-              <button className="btn btn-outline-light btn-lg px-5 py-3 fw-semibold">
+              <button
+                className="btn btn-outline-light btn-lg px-5 py-3 fw-semibold"
+                onClick={() => {
+                  const el = document.getElementById('how-transitaire');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+              >
                 Je suis un transitaire
               </button>
             </div>
@@ -513,7 +524,7 @@ function IndexPage() {
         <div className="container">
           <h2 className="text-center fw-bold mb-5">Comment ça marche</h2>
           <div className="row g-4">
-            <div className="col-12 col-lg-6">
+            <div className="col-12 col-lg-6" id="how-client">
               <Panel
                 title="Pour les clients"
                 subtitle="Commencez et gérez vos expéditions en toute simplicité."
@@ -527,7 +538,7 @@ function IndexPage() {
                 imgSrc={'/client1.jpg'}
               />
             </div>
-            <div className="col-12 col-lg-6">
+            <div className="col-12 col-lg-6" id="how-transitaire">
               <Panel
                 title="Pour les transitaires"
                 subtitle="Développez votre activité avec des opportunités qualifiées."
@@ -554,7 +565,7 @@ function IndexPage() {
               <div className="p-4 bg-white rounded-4 shadow-sm h-100">
                 <p className="mb-4">"TransDigiSN a transformé notre gestion logistique. Trouver un transitaire fiable n'a jamais été aussi simple."</p>
                 <div className="d-flex align-items-center gap-3">
-                  <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 56, height: 56, backgroundColor: COLORS.green, color: 'white', fontWeight: 'bold' }}>MD</div>
+                  <img src={'/client2.jpg'} alt="Client" className="rounded-circle" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center top' }} />
                   <div>
                     <div className="fw-bold">Marie Dubois</div>
                     <div className="text-muted small">Responsable Logistique, TechCorp</div>
@@ -566,7 +577,7 @@ function IndexPage() {
               <div className="p-4 bg-white rounded-4 shadow-sm h-100">
                 <p className="mb-4">"La plateforme m'a permis d'accéder à un flux constant de nouvelles opportunités. Mon CA a augmenté de 20% en 6 mois."</p>
                 <div className="d-flex align-items-center gap-3">
-                  <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 56, height: 56, backgroundColor: COLORS.blue, color: 'white', fontWeight: 'bold' }}>JM</div>
+                  <img src={'/transitaire2.jpg'} alt="Transitaire" className="rounded-circle" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center top' }} />
                   <div>
                     <div className="fw-bold">Jean Martin</div>
                     <div className="text-muted small">Directeur, LogiPro Transit</div>

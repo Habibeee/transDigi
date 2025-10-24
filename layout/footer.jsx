@@ -1,6 +1,19 @@
  import React from 'react';
 
 function Footer() {
+  const scrollToHow = (e) => {
+    e.preventDefault();
+    const go = () => {
+      const el = document.getElementById('how-client');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    if (window.location.hash !== '#/' && window.location.hash !== '') {
+      window.location.hash = '#/';
+      setTimeout(go, 150);
+    } else {
+      go();
+    }
+  };
   return (
     <footer className="bg-white border-top w-100">
       <div className="container-fluid py-4 px-0">
@@ -15,16 +28,16 @@ function Footer() {
           <div className="col-6 col-lg-2">
             <h6 className="fw-bold mb-2">Liens rapides</h6>
             <ul className="list-unstyled mb-0 d-grid gap-1">
-              <li><a className="text-decoration-none" href="#transitaire" style={{ color: '#5C757D' }}>Trouver un transitaire</a></li>
-              <li><a className="text-decoration-none" href="#how" style={{ color: '#5C757D' }}>Comment ça marche</a></li>
-              <li><a className="text-decoration-none" href="#contact" style={{ color: '#5C757D' }}>Contact</a></li>
+              <li><a className="text-decoration-none" href="#/connexion" style={{ color: '#5C757D' }}>Trouver un transitaire</a></li>
+              <li><a className="text-decoration-none" href="#/" onClick={scrollToHow} style={{ color: '#5C757D' }}>Comment ça marche</a></li>
+              <li><a className="text-decoration-none" href="#/contact" style={{ color: '#5C757D' }}>Contact</a></li>
             </ul>
           </div>
           <div className="col-6 col-lg-3">
             <h6 className="fw-bold mb-2">Professionnels</h6>
             <ul className="list-unstyled mb-0 d-grid gap-1">
-              <li><a className="text-decoration-none" href="#devenir" style={{ color: '#5C757D' }}>Devenir transitaire</a></li>
-              <li><a className="text-decoration-none" href="#pro" style={{ color: '#5C757D' }}>Connexion pro</a></li>
+              <li><a className="text-decoration-none" href="#/transitaire" style={{ color: '#5C757D' }}>Devenir transitaire</a></li>
+              <li><a className="text-decoration-none" href="#/connexion" style={{ color: '#5C757D' }}>Connexion pro</a></li>
             </ul>
           </div>
           <div className="col-12 col-lg-3">
