@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connexionStyles } from '../styles/connexionStyle.jsx';
+import { login as apiLogin } from '../services/apiClient.js';
 
 function Connexion() {
   const [showPwd, setShowPwd] = useState(false);
@@ -7,6 +8,8 @@ function Connexion() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('client');
   const [errors, setErrors] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
   const isPhone = (v) => /^\+?\d[\d\s.-]{7,}$/.test(v);
@@ -22,18 +25,33 @@ function Connexion() {
     return '';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setAuthError('');
     const emailErr = validateEmailOrPhone(email);
     const pwdErr = validatePassword(password);
     setErrors({ email: emailErr, password: pwdErr });
     if (emailErr || pwdErr) return;
-    if (role === 'transitaire') {
-      window.location.hash = '#/dashboard-transitaire';
-    } else if (role === 'admin') {
-      window.location.hash = '#/dashboard-admin';
-    } else {
-      window.location.hash = '#/dashboard-client';
+    try {
+      setLoading(true);
+      const data = await apiLogin(email, password);
+      const token = (data?.token || data?.accessToken || '').trim();
+      if (!token) {
+        throw new Error(data?.message || 'Identifiants invalides');
+      }
+      localStorage.setItem('token', token);
+      const serverRole = data?.user?.role || data?.role;
+      if (serverRole === 'transitaire') {
+        window.location.hash = '#/dashboard-transitaire';
+      } else if (serverRole === 'admin') {
+        window.location.hash = '#/dashboard-admin';
+      } else {
+        window.location.hash = '#/dashboard-client';
+      }
+    } catch (err) {
+      setAuthError(err?.message || "Échec de l'authentification");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,9 +141,12 @@ function Connexion() {
                   </select>
                 </div>
 
-                <button type="submit" className="btn btn-success fw-semibold py-2" disabled={!!(errors.email || errors.password) || !email || !password}>
+                <button type="submit" className="btn btn-success fw-semibold py-2" disabled={loading || !!(errors.email || errors.password) || !email || !password}>
                   Se connecter
                 </button>
+                {authError && (
+                  <div className="text-danger small">{authError}</div>
+                )}
 
                 <div className="text-center text-muted">ou</div>
 

@@ -94,10 +94,22 @@ const ClientDashboard = () => {
     ctx.fill();
   }, [section]);
 
-  const devis = [
+  const [devis, setDevis] = useState([
     { id: '#12345', destination: 'New York, USA', status: 'approuve', statusLabel: 'Approuvé', statusColor: '#E8F5E9', statusTextColor: '#28A745', date: '2023-10-27' },
     { id: '#12346', destination: 'Londres, UK', status: 'en-attente', statusLabel: 'En attente', statusColor: '#FFF9E6', statusTextColor: '#F57C00', date: '2023-10-26' },
-  ];
+  ]);
+
+  const cancelDevis = (id) => {
+    const ok = window.confirm('Confirmer l\'annulation de ce devis ?');
+    if (!ok) return;
+    setDevis(prev => prev.map(d => d.id === id ? {
+      ...d,
+      status: 'annule',
+      statusLabel: 'Annulé',
+      statusColor: '#FEE2E2',
+      statusTextColor: '#DC2626'
+    } : d));
+  };
 
   const envoysActifs = [
     { id: '#SH5829', status: 'En transit', destination: 'Los Angeles, USA' },
@@ -213,6 +225,7 @@ const ClientDashboard = () => {
                               <th className="border-0 pb-3">Destination</th>
                               <th className="border-0 pb-3">Statut</th>
                               <th className="border-0 pb-3">Date</th>
+                              <th className="border-0 pb-3 text-end">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -226,6 +239,11 @@ const ClientDashboard = () => {
                                   </span>
                                 </td>
                                 <td className="py-3 text-muted">{item.date}</td>
+                                <td className="py-3 text-end">
+                                  {item.status === 'en-attente' && (
+                                    <button className="btn btn-sm btn-outline-danger" onClick={() => cancelDevis(item.id)}>Annuler</button>
+                                  )}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
